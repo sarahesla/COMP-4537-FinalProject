@@ -1,0 +1,196 @@
+<!doctype HTML>
+<html lang="en"> 
+    <head>
+        <title>Ledger</title>            
+          <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Bootstrap CSS -->
+     
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="https://unpkg.com/@yaireo/tagify@4.0.3/dist/tagify.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.metroui.org.ua/v4/css/metro-all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
+        <script src="./js/Helper.js"></script>
+        <script src="./js/User.js"></script>
+        <script src="./js/Ledger.js"></script>
+        <script src="./js/Transaction.js"></script>
+        <script src="./js/ledger_core.js"></script>
+        <link rel="stylesheet" href="./css/style.css">
+   
+    </head>
+    <body>
+    <div>
+
+    </div>
+    <div class="container">
+        <div class="row">
+             <div class="col-2">
+               <a class="btn btn-secondary" href="home.html" role="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                     <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                </svg>
+               </a>
+            </div>
+            <div class="col">
+
+                <h2>@<span class="username"></span></h2>
+            </div>
+            <div class="col-2"></div>
+            <div class="col">
+              <div class="form-group">
+                <button class="btn btn-danger logoutBtn">Logout</button>
+            </div>
+            </div>
+        </div>
+
+        <div class="row">
+          <div class="content">
+            <p class="page_code"></p>
+            <p class="page_status"></p>
+            </div>
+
+       </div>
+       <div class="row ledger_section">
+        <template class="ledger_template">
+            <div class="row ledger_content" >
+              <div class="col ledger_card" >
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                        <div class="col-10">
+                          <h3 class="card-title"></h3>
+                          <h6 class="card-subtitle mb-2 text-muted"></h6>
+                        </div>
+                        <div class="col-2">
+                          <button type="button" data-bs-toggle="modal" data-bs-target="#newTrModal"  class="btn btn-success float-right" id="addTrBtn" href="home.html" role="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                              <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"/>
+                            </svg>
+                          </button>
+                        </div>
+                    </div>
+                    <div class="row justify-content-md-center"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+       </div>
+
+       <div class="row transaction_section" >
+        <template class="tr_template">
+           <div class="row transaction_content">
+              <div class="col transaction_card card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-10">
+                      <h6 class="card-title">TRANSACTION NAME</h6>
+                      <h6 class="card-subtitle mb-2 text-muted">TRANSACTION COST</h6>
+                    </div>
+                    <div class="col-2 justify-content-md-center">
+                      <div class="row justify-content-md-flex-end">
+                      <div class="col">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#editTrModal" class="btn btn-secondary float-right editBtn" id="editTrBtn">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                              <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                            </svg>
+                        </a>
+                        </div>
+
+                        <div class="col">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#delTrModal" class="btn btn-danger float-right deleteBtn" id="delTrBtn">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+  <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+</svg>
+                        </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+           </div>
+         </template>
+        </div>
+    </div>
+        
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+<script src="https://cdn.metroui.org.ua/v4/js/metro.min.js"></script>
+<div class="modal fade" id="newTrModal" tabindex="-1" aria-labelledby="newTrModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newTrModal">Add Transaction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="ledger-name" class="col-form-label">Transaction Name: </label>
+            <input type="text" class="form-control" id="tr_name">
+          </div>
+          <div class="mb-3">
+            <label for="ledger-name" class="col-form-label">Amount</label>
+            <input type="number" class="form-control" id="tr_amount">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="createBtn">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editTrModal" tabindex="-1" aria-labelledby="editTrModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTrModal">Edit Transaction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="tr_name" class="col-form-label">Transaction Name </label>
+            <input type="text" class="form-control" id="tr_name" value="GET FROM DB">
+          </div>
+          <div class="mb-3">
+            <label for="ledger-tr_amount" class="col-form-label">Amount</label>
+            <input type="number" class="form-control" id="tr_amount" value="GET FROM DB">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delTrModal" tabindex="-1" aria-labelledby="delTrModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="delTrModal">Delete Transaction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this transaction?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelBtn" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger" id="delBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </body>
+</html>
