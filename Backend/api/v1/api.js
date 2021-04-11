@@ -9,6 +9,9 @@ import Helper from '../../src/Helper'
 import User from '../../src/User'
 import Ledger from '../../src/Ledger'
 import Transaction from '../../src/Transaction'
+let reload = require('reload')
+let mysql = require("mysql")
+
 let path = require("path")
 let api = express.Router()
 let privateKey = fs.readFileSync("./src/security/private.key", "utf8");
@@ -21,17 +24,18 @@ let CONFIG = {
     port: 25060,
     insecureAuth: true,
     database: "tproj",
-    max_connections: 40000
+    connectionLimit: 70
 }
 
-// let CONFIG = {
-//     user: "sarahesl_admin",
-//     host: "s11.fcomet.com",
-//     password: "thisisapassword",
-//     database: "sarahesl_finalproj"
-// }
+const pool = mysql.createPool(CONFIG)
+
 
 api.use(express.static(__dirname))
+
+api.get("/", async(req, res) => {
+    res.redirect('https://olivesky.ca/op')
+})
+
 
 /**Admin Resource
  * Endpoints:
@@ -40,12 +44,13 @@ api.use(express.static(__dirname))
  * 3. GET /admin
  */
 api.post("/admin/register", async(req, res) => {
+    let db = new DBManager(pool, req.app)
     try {
         // validate the request
         let { username, password, repeat_password } = req.body
 
         //create a DBManager instance (dependecy injection)
-        let db = new DBManager(CONFIG)
+
 
         //validate, create, and register admin using db
         let result = await Admin.create({ username, password, repeat_password }, db)
@@ -61,6 +66,8 @@ api.post("/admin/register", async(req, res) => {
         }
         console.log(e)
         return res.status(400).json({ error: "Invalid Request." })
+    } finally {
+
     }
 })
 
@@ -69,7 +76,7 @@ api.post("/admin/register", async(req, res) => {
 api.post("/user/register", async(req, res) => {
 
     //create a DBManager instance (dependecy injection)
-    let db = new DBManager(CONFIG)
+    let db = new DBManager(pool, req.app)
     try {
         // validate the request
         let { username, password, repeat_password } = req.body
@@ -90,12 +97,12 @@ api.post("/user/register", async(req, res) => {
         console.log(e)
         return res.status(400).json({ error: "Invalid Request." })
     } finally {
-        db.con.end()
+
     }
 })
 
 api.post("/admin/login", async(req, res) => {
-    let db = new DBManager(CONFIG)
+    let db = new DBManager(pool, req.app)
     try {
         let { username, password } = req.body
         let result = await Admin.login({ username, password }, db)
@@ -107,12 +114,12 @@ api.post("/admin/login", async(req, res) => {
         console.log(e)
         return res.status(400).json({ error: "Invalid Request." })
     } finally {
-        db.con.end()
+
     }
 })
 
 api.post("/user/login", async(req, res) => {
-    let db = new DBManager(CONFIG)
+    let db = new DBManager(pool, req.app)
     try {
         let { username, password } = req.body
         let result = await User.login({ username, password }, db)
@@ -124,12 +131,12 @@ api.post("/user/login", async(req, res) => {
         console.log(e)
         return res.status(400).json({ error: "Invalid Request." })
     } finally {
-        db.con.end()
+
     }
 })
 
 api.get("/admin", Helper.verifyAuthToken, async(req, res) => {
-    let db = new DBManager(CONFIG)
+    let db = new DBManager(pool, req.app)
     try {
         let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             // get user data and merge it into user object
@@ -143,13 +150,13 @@ api.get("/admin", Helper.verifyAuthToken, async(req, res) => {
         console.log(e)
         return res.status(400).json({ error: "Invalid Request." })
     } finally {
-        db.con.end()
+
     }
 })
 
 api.get("/user",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        await Helper.verifyRequest(req, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
@@ -170,11 +177,11 @@ api.get("/user",
 
 api.get("/ledgers",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        await Helper.verifyRequest(req, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let ledgers = await Ledger.get_all(currentUser.user_id, db)
@@ -188,7 +195,7 @@ api.get("/ledgers",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
@@ -198,11 +205,11 @@ api.get("/ledgers",
 // create a new ledger
 api.post("/ledger",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        await Helper.verifyRequest(req, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let { user_id } = currentUser
@@ -226,7 +233,7 @@ api.post("/ledger",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
@@ -237,11 +244,11 @@ api.get("/ledger/:id",
     async(req, res, next) => {
         let r = req
         r.url = "/ledger/:id"
-        await Helper.verifyRequest(r, res, next, new DBManager(CONFIG))
+        await Helper.verifyRequest(r, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let { user_id } = currentUser
@@ -257,7 +264,7 @@ api.get("/ledger/:id",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
@@ -267,11 +274,13 @@ api.get("/ledger/:id",
 // create a new transaction
 api.post("/transaction",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        let r = req
+        r.url = "/transaction"
+        await Helper.verifyRequest(r, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let { user_id } = currentUser
@@ -289,7 +298,7 @@ api.post("/transaction",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
@@ -297,11 +306,13 @@ api.post("/transaction",
 
 api.get("/transactions",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        let r = req
+        r.url = "/transactions?ledger_id="
+        await Helper.verifyRequest(r, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let { ledger_id } = req.query
@@ -315,7 +326,7 @@ api.get("/transactions",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
@@ -324,15 +335,17 @@ api.get("/transactions",
 
 api.put("/transaction",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        let r = req
+        r.url = "/transaction"
+        await Helper.verifyRequest(r, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
             let { tr_id, name, amount } = req.body
-            let trs = await Transaction.edit(tid, name, amount, db)
+            let trs = await Transaction.edit(tr_id, name, amount, db)
                 // get user data -> ledgers and shit and merge it into user object
             return res.json(trs.get())
         } catch (e) {
@@ -342,24 +355,27 @@ api.put("/transaction",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )
 
 
 
-api.delete("/transaction",
+api.delete("/transaction/:id",
     async(req, res, next) => {
-        await Helper.verifyRequest(req, res, next, new DBManager(CONFIG))
+        let r = req
+        r.url = "/transaction/:id"
+        await Helper.verifyRequest(r, res, next, new DBManager(pool, req.app))
     },
     Helper.verifyAuthToken,
     async(req, res) => {
-        let db = new DBManager(CONFIG)
+        let db = new DBManager(pool, req.app)
         try {
             let currentUser = await Helper.jwtVerifyUser(req.token, publicKey)
-            let { tr_id } = req.body
-            let trs = await Transaction.get_all(tr_id, db)
+            let tr_id = req.params.id
+            console.log("tr_id:", tr_id)
+            let trs = await Transaction.delete(tr_id, db)
                 // get user data -> ledgers and shit and merge it into user object
             return res.json(trs.get())
         } catch (e) {
@@ -369,7 +385,7 @@ api.delete("/transaction",
             console.log(e)
             return res.status(400).json({ error: "Invalid Request." })
         } finally {
-            db.con.end()
+
         }
     }
 )

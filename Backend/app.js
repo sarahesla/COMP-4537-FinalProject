@@ -20,13 +20,13 @@ app.use(cors())
 app.use(morgan("tiny"))
 app.use(express.static("private"))
 app.use('/op/api/v1/documentation.html', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use(bodyParser.json({limit: '5mb'}))
-app.use(bodyParser.urlencoded({limit: '5mb', extended: false}))
+app.use(bodyParser.json({ limit: '5mb' }))
+app.use(bodyParser.urlencoded({ limit: '5mb', extended: false }))
 app.set("json spaces", 2)
 
 
-app.get("/admin", (req, res) =>{
-    res.status(200).json({"name": "harry"})
+app.get("/admin", (req, res) => {
+    res.status(200).json({ "name": "harry" })
 })
 
 // register api routes on app
@@ -35,10 +35,6 @@ app.use("/op/api/v1", api)
 
 
 
-server.listen(PORT, async () => {
+server.listen(PORT, async() => {
     console.log("listening on port: ", PORT)
 })
-
-
-
-

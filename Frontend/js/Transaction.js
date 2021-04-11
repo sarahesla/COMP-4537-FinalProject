@@ -76,7 +76,7 @@ class Transaction {
                         'Authorization': authToken,
                         "x-api-key": API_KEY
                     },
-                    params: {
+                    data: {
                         tr_id,
                         name,
                         amount
@@ -101,15 +101,12 @@ class Transaction {
             try {
                 let res = await axios({
                     method: 'DELETE',
-                    url: BASE_URL + "/transaction",
+                    url: BASE_URL + "/transaction/" + tr_id,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
                         'Access-Control-Max-Age': 2592000,
                         'Authorization': authToken,
                         "x-api-key": API_KEY
-                    },
-                    params: {
-                        tr_id
                     }
 
                 })

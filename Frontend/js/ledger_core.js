@@ -1,5 +1,6 @@
 let state = {
-    tr_id: ""
+    tr_id: "",
+    trs: []
 }
 
 function render(l) {
@@ -54,6 +55,7 @@ function renderTR(tr) {
     let t = H.d("#tr_template-" + id)
     let c = document.importNode(t.content, true)
     c.id = "tr-" + id
+    H._(c, ".transaction_content").id = "tc-" + id
     H._(c, ".card-title").id = "card-title-" + id
     H._(c, "#card-title-" + id).innerHTML = tr.tr_name
     H._(c, ".card-subtitle").id = "card-subtitle-" + id
@@ -62,50 +64,12 @@ function renderTR(tr) {
     H._(c, ".editBtn").id = "editBtn-" + id
     H._(c, ".deleteBtn").id = "deleteBtn-" + id
 
-    H._(c, "#editBtn-" + id).addEventListener("click", edit_tr(id))
-    H._(c, "#deleteBtn-" + id).addEventListener("click", delete_tr(id))
-    H._(c, "#card-subtitle-" + id).innerHTML = "$" + tr.amount
-    H._(c, ".transaction_card").style.cssText = "padding: 0% 15%;background-color:#f8f8f8"
+
+    H._(c, "#card-subtitle-" + id).innerHTML = "$ " + tr.amount
+    H._(c, ".transaction_content").style.cssText = "margin: auto; width:60%;background-color:#f8f8f8"
     H.d(".transaction_section").appendChild(c)
 }
 
-function edit_tr(id) {
-    return async function() {
-        H.d("#tr_name").value = H.d("#card-title-" + id).value
-        H.d("#tr_amount").value = H.d("#card-subtitle-" + id).value
-
-        let name = H.d("#tr_name").value
-        let amount = H.d("#tr_amount").value
-        try {
-            let authToken = localStorage.getItem("uauthToken")
-            let url = new URL(window.location.href)
-            console.log(url)
-            let lid = url.search.split("&")[0].split("?id=")[1]
-
-            let edit_result = await Transaction.edit(id, name, amount, authToken)
-            await updateamounts(lid)
-        } catch (e) {
-            console.log(e)
-        }
-    }
-}
-
-
-function delete_tr(id) {
-    return async function() {
-        try {
-            let url = new URL(window.location.href)
-            console.log(url)
-            let lid = url.search.split("&")[0].split("?id=")[1]
-            let authToken = localStorage.getItem("uauthToken")
-
-            let edit_result = await Transaction.delete(id)
-            await updateamounts(lid)
-        } catch (e) {
-            console.log(e)
-        }
-    }
-}
 
 async function updateamounts(id) {
     try {
@@ -142,6 +106,7 @@ async function render_trs(id) {
         let authToken = localStorage.getItem("uauthToken")
         let trs = await Transaction.get_all(id, authToken)
         console.log(trs)
+        state.trs = trs
 
         let ushares = {}
 
@@ -221,7 +186,88 @@ document.addEventListener("DOMContentLoaded", async(event) => {
     }
 
 
+    for (const tr of state.trs) {
+        H.d("#editBtn-" + tr.tr_id).addEventListener("click", edit_tr(tr.tr_id))
+        H.d("#deleteBtn-" + tr.tr_id).addEventListener("click", delete_tr(tr.tr_id))
+    }
 
+    $("#editTrModal").on('shown.bs.modal', function() {
+        console.log($('#tr_name1'))
+        $('#tr_name1').val(H.d("#card-title-" + state.tr_id).textContent)
+        $('#tr_amount1').val(Number(H.d("#card-subtitle-" + state.tr_id).textContent.split("$ ")[1]))
+    })
+
+
+    function edit_tr(id) {
+        return function() {
+            state.tr_id = id
+                // console.log(H.d("#card-subtitle-" + id).textContent)
+        }
+    }
+
+
+
+    function delete_tr(id) {
+        return async function() {
+            try {
+
+                let url = new URL(window.location.href)
+                console.log(url)
+                let lid = url.search.split("&")[0].split("?id=")[1]
+                let authToken = localStorage.getItem("uauthToken")
+
+                let edit_result = await Transaction.delete(id, authToken)
+                await updateamounts(lid)
+                H.d("#tc-" + id).remove()
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+
+
+    /**
+     * Trigger a custom event
+     * @param {*} el the element 
+     * @param {*} etype event type
+     */
+    function eventFire(el, etype) {
+        if (el.fireEvent) {
+            (el.fireEvent('on' + etype));
+        } else {
+            var evObj = document.createEvent('Events');
+            evObj.initEvent(etype, true, false);
+            el.dispatchEvent(evObj);
+        }
+    }
+
+
+
+    let saveBtn = H.d("#saveBtn")
+    saveBtn.addEventListener("click", async(event) => {
+        try {
+
+            let name = H.d("#tr_name1").value
+            let amount = H.d("#tr_amount1").value
+
+            let authToken = localStorage.getItem("uauthToken")
+            let url = new URL(window.location.href)
+            console.log(url)
+            let lid = url.search.split("&")[0].split("?id=")[1]
+
+            let edit_result = await Transaction.edit(state.tr_id, name, Number(amount), authToken)
+            console.log(edit_result)
+            await updateamounts(lid)
+            H.d("#card-title-" + state.tr_id).textContent = name
+            H.d("#card-subtitle-" + state.tr_id).textContent = "$ " + amount
+            let cancelBtn = H.d("#cancelBtn1")
+            eventFire(cancelBtn, 'click');
+
+
+        } catch (e) {
+            console.log(e)
+        }
+    })
 
 
 
@@ -269,18 +315,5 @@ document.addEventListener("DOMContentLoaded", async(event) => {
 
 
 
-    /**
-     * Trigger a custom event
-     * @param {*} el the element 
-     * @param {*} etype event type
-     */
-    function eventFire(el, etype) {
-        if (el.fireEvent) {
-            (el.fireEvent('on' + etype));
-        } else {
-            var evObj = document.createEvent('Events');
-            evObj.initEvent(etype, true, false);
-            el.dispatchEvent(evObj);
-        }
-    }
+
 })

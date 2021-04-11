@@ -102,7 +102,7 @@
                         </div>
 
                         <div class="col">
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#delTrModal" class="btn btn-danger float-right deleteBtn" id="delTrBtn">
+                        <a href="#"  class="btn btn-danger float-right deleteBtn" id="delTrBtn">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
   <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
 </svg>
@@ -158,39 +158,23 @@
         <form>
           <div class="mb-3">
             <label for="tr_name" class="col-form-label">Transaction Name </label>
-            <input type="text" class="form-control" id="tr_name" value="GET FROM DB">
+            <input type="text" class="form-control" id="tr_name1" value="">
           </div>
           <div class="mb-3">
             <label for="ledger-tr_amount" class="col-form-label">Amount</label>
-            <input type="number" class="form-control" id="tr_amount" value="GET FROM DB">
+            <input type="number" class="form-control" id="tr_amount1" value="">
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="cancelBtn" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn1" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="delTrModal" tabindex="-1" aria-labelledby="delTrModal" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="delTrModal">Delete Transaction</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this transaction?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="cancelBtn" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-danger" id="delBtn">Delete</button>
-      </div>
-    </div>
-  </div>
-</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
 
     </body>
 </html>

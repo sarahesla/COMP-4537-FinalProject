@@ -1,3 +1,4 @@
+let reload = require('reload')
 import Result from "./Result";
 let mysql = require("mysql")
     /**
@@ -5,12 +6,12 @@ let mysql = require("mysql")
      * 
      */
 export default class DBManager {
-    constructor(config) {
+    constructor(pool, app) {
         try {
-            this.con = mysql.createConnection(config)
-            this.con.connect()
+            this.con = pool
         } catch (e) {
-            throw 1 / 0
+            console.log("we here !!!!!!!!!!!")
+            reload(app)
         }
     }
 
